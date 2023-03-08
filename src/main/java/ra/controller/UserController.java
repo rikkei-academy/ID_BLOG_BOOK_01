@@ -9,7 +9,7 @@ import ra.model.service.UserService;
 import javax.persistence.Column;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "*")
 @RequestMapping("api/v1/user")
 @AllArgsConstructor
 public class UserController {
