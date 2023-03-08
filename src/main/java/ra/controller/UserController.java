@@ -7,9 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ra.dto.response.UserDto;
+import ra.model.entity.Users;
 import ra.model.service.UserService;
+import ra.security.CustomUserDetails;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,5 +49,4 @@ public class UserController {
         data.put("totalPages",users.getTotalPages());
         return  new ResponseEntity<>(data, HttpStatus.OK);
     }
-
 }
