@@ -13,7 +13,7 @@ import javax.persistence.Column;
 @RequestMapping("api/v1/user")
 @AllArgsConstructor
 public class UserController {
-    private UserService userService;
+
 
 
 
