@@ -119,4 +119,9 @@ public class UserServiceImple implements UserService {
         userDto.setListRoles(stringList);
         return userDto;
     }
+
+    @Override
+    public Users findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 }
