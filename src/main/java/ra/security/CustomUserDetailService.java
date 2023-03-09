@@ -22,3 +22,4 @@ public class CustomUserDetailService implements UserDetailsService {
         return CustomUserDetails.mapUserToUserDetail(users);
     }
 }
+

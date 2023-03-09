@@ -4,27 +4,18 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import ra.jwt.JwtTokenProvider;
 import ra.model.entity.ERole;
 import ra.model.entity.Roles;
 import ra.model.entity.Users;
 import ra.model.service.RoleService;
 import ra.model.service.UserService;
-import ra.payload.request.LoginRequest;
 import ra.payload.request.RegisterRequest;
 import ra.payload.respone.MessageResponse;
-import ra.security.CustomUserDetails;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -32,10 +23,6 @@ import java.util.stream.Collectors;
 @RequestMapping("api/v1/user")
 @AllArgsConstructor
 public class UserController {
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtTokenProvider tokenProvider;
     @Autowired
     private UserService userService;
     @Autowired
@@ -106,27 +93,7 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully"));
     }
 
-    //    ------------------------- ĐĂNG NHẬP ---------------------------
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPasswords());
-        System.out.println(usernamePasswordAuthenticationToken.toString());
-        Authentication authentication = authenticationManager.authenticate(
-               usernamePasswordAuthenticationToken
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        CustomUserDetails customUserDetail = (CustomUserDetails) authentication.getPrincipal();
-        if (!customUserDetail.isStatusUser()){
-            return ResponseEntity.badRequest().body(new MessageResponse("User is locked"));
-        } else {
-            //Sinh JWT tra ve client
-            String jwt = tokenProvider.generateToken(customUserDetail);
-            //Lay cac quyen cua user
-            List<String> listRoles = customUserDetail.getAuthorities().stream()
-                    .map(item -> item.getAuthority()).collect(Collectors.toList());
-            return ResponseEntity.ok().body("OK");
-        }
-    }
-
 
 }
+
+
