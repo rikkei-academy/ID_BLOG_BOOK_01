@@ -93,10 +93,8 @@ public class UserController {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         CustomUserDetails customUserDetail = (CustomUserDetails) authentication.getPrincipal();
-        //Sinh JWT tra ve client
         String jwt = tokenProvider.generateToken(customUserDetail);
         System.out.println(jwt);
-        //Lay cac quyen cua user
         List<String> listRoles = customUserDetail.getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
         JwtResponse response = new JwtResponse(customUserDetail.getUserId(), customUserDetail.getFirstName(), customUserDetail.getLastName(), jwt, customUserDetail.getUsername(), customUserDetail.getEmail(),
