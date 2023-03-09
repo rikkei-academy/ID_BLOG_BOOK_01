@@ -2,7 +2,7 @@ package ra.dto.request;
 
 public class UserLogin {
     private String userName;
-    private String password;
+    private String passwords;
 
     public String getUserName() {
         return userName;
@@ -12,11 +12,11 @@ public class UserLogin {
         this.userName = userName;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswords() {
+        return passwords;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswords(String passwords) {
+        this.passwords = passwords;
     }
 }
