@@ -50,7 +50,7 @@ public class UserServiceImple implements UserService {
                 case "status":
                     while (iterator.hasNext()) {
                         Users user = iterator.next();
-                        if (user.isStatusUser()!=Boolean.parseBoolean(rule.getRulesValue())) {
+                        if (user.isStatusUser() != Boolean.parseBoolean(rule.getRulesValue())) {
                             iterator.remove();
                         }
                     }
@@ -75,22 +75,27 @@ public class UserServiceImple implements UserService {
         }
         return usersList;
     }
+
     @Override
     public Page<Users> listUser(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
+
     @Override
     public Users saveOrUpdate(Users users) {
         return null;
     }
+
     @Override
     public Users findById(Integer id) {
         return null;
     }
+
     @Override
     public Page<Users> findByName(String name, Pageable pageable) {
         return userRepository.findByUserNameContaining(name, pageable);
     }
+
     @Override
     public UserDto mapUserToUserDto(Users users) {
         UserDto userDto = new UserDto();
@@ -112,5 +117,10 @@ public class UserServiceImple implements UserService {
         List<String> stringList = roles.stream().map(roles1 -> roles1.getRoleName().toString()).collect(Collectors.toList());
         userDto.setListRoles(stringList);
         return userDto;
+    }
+
+    @Override
+    public Users findByEmail(String email) {
+        return findByEmail(email);
     }
 }
