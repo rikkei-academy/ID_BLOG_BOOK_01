@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -89,7 +90,7 @@ public class UserController {
     @PostMapping("/signin")
     public ResponseEntity<?> loginUser(@RequestBody UserLogin userLogin) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userLogin.getUserName(), userLogin.getPassword())
+                new UsernamePasswordAuthenticationToken(userLogin.getUserName(), userLogin.getPasswords())
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         CustomUserDetails customUserDetail = (CustomUserDetails) authentication.getPrincipal();
@@ -160,6 +161,11 @@ public class UserController {
         user.setEmail(signupRequest.getEmail());
         user.setPhone(signupRequest.getPhone());
         user.setAddress(signupRequest.getAddress());
+        user.setState(signupRequest.getState());
+        user.setCity(signupRequest.getCity());
+        user.setPost(signupRequest.getPost());
+        user.setBirtDate(signupRequest.getBirtDate());
+        user.setRanks(0);
         user.setStatusUser(true);
         Set<String> strRoles = signupRequest.getListRoles();
         Set<Roles> listRoles = new HashSet<>();
@@ -203,6 +209,176 @@ public class UserController {
         user.setListRoles(listRoles);
         userService.saveOrUpdate(user);
         return ResponseEntity.ok(new MessageResponse("User registered successfully"));
+    }
+
+
+    //    -------------------   ROLE: ADMIN   -------------------------
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Users> getAllUser() {
+        return userService.findAll();
+    }
+
+    @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public Users getUserById(@PathVariable("userId") int userId) {
+        return userService.findById(userId);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createUser(@RequestBody RegisterRequest signupRequest) {
+        try {
+            return registerUser(signupRequest);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUser(@PathVariable("userId") int userId, @RequestBody RegisterRequest registerRequest) throws Throwable {
+        Users userUpdate = (Users) userService.findById(userId);
+        userUpdate.setStatusUser(registerRequest.isStatusUser());
+        userUpdate.setRanks(registerRequest.getRanks());
+        Set<String> strRoles = registerRequest.getListRoles();
+        Set<Roles> listRoles = new HashSet<>();
+        if (strRoles == null) {
+            //User quyen mac dinh
+            Roles userRole = (Roles) roleService.findByRoleName(ERole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found"));
+            listRoles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin":
+                        Roles adminRole = null;
+                        try {
+                            adminRole = (Roles) roleService.findByRoleName(ERole.ROLE_ADMIN)
+                                    .orElseThrow(() -> new RuntimeException("Error: Role is not found"));
+                        } catch (Throwable e) {
+                            throw new RuntimeException(e);
+                        }
+                        listRoles.add(adminRole);
+                    case "moderator":
+                        Roles modRole = null;
+                        try {
+                            modRole = (Roles) roleService.findByRoleName(ERole.ROLE_MODERATOR)
+                                    .orElseThrow(() -> new RuntimeException("Error: Role is not found"));
+                        } catch (Throwable e) {
+                            throw new RuntimeException(e);
+                        }
+                        listRoles.add(modRole);
+                    case "user":
+                        Roles userRole = null;
+                        try {
+                            userRole = (Roles) roleService.findByRoleName(ERole.ROLE_USER)
+                                    .orElseThrow(() -> new RuntimeException("Error: Role is not found"));
+                        } catch (Throwable e) {
+                            throw new RuntimeException(e);
+                        }
+                        listRoles.add(userRole);
+                }
+            });
+        }
+        userUpdate.setListRoles(listRoles);
+        userService.saveOrUpdate(userUpdate);
+        return ResponseEntity.ok(new MessageResponse("Update successfully!"));
+    }
+
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    public ResponseEntity<?> deleteUser(@PathVariable("userId") int userId) {
+        try {
+            Users userDelete = (Users) userService.findById(userId);
+            userDelete.setStatusUser(false);
+            userService.saveOrUpdate(userDelete);
+            return ResponseEntity.ok().body("Delete success");
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Delete fail");
+        }
+    }
+
+
+    //    --------------------- ROLE : MODERATOR ----------------------------
+    @GetMapping("getAllUserForModerator")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    public List<Users> getAllUserForModerator() {
+        List<Users> usersForModerator = new ArrayList<>();
+        List<Users> listUser = userService.findAll();
+        Set<Roles> roleUser = new HashSet<>();
+        Roles userRole = new Roles(3,ERole.ROLE_USER);
+        roleUser.add(userRole);
+        for (Users user : listUser) {
+            if (user.getListRoles().containsAll(roleUser)&&user.getListRoles().size()==1){
+                usersForModerator.add(user);
+            }
+
+        }
+        return usersForModerator;
+    }
+
+    @PostMapping("createNewUser")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    public ResponseEntity<?> createUserforModerator(@RequestBody RegisterRequest signupRequest){
+        if (userService.existsByUserName(signupRequest.getUserName())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Usermame is already"));
+        }
+        if (userService.existsByEmail(signupRequest.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already"));
+        }
+        Users user = new Users();
+        user.setUserName(signupRequest.getUserName());
+        user.setPasswords(encoder.encode(signupRequest.getPasswords()));
+        user.setAvatar(signupRequest.getAvatar());
+        user.setLastName(signupRequest.getLastName());
+        user.setFirstName(signupRequest.getFirstName());
+        user.setEmail(signupRequest.getEmail());
+        user.setPhone(signupRequest.getPhone());
+        user.setAddress(signupRequest.getAddress());
+        user.setState(signupRequest.getState());
+        user.setCity(signupRequest.getCity());
+        user.setPost(signupRequest.getPost());
+        user.setBirtDate(signupRequest.getBirtDate());
+        user.setRanks(0);
+        user.setStatusUser(true);
+        Set<Roles> roleUser = new HashSet<>();
+        Roles userRole = new Roles(3,ERole.ROLE_USER);
+        roleUser.add(userRole);
+        user.setListRoles(roleUser);
+        userService.saveOrUpdate(user);
+        return ResponseEntity.ok(new MessageResponse("User registered successfully"));
+    }
+
+    @PutMapping("updateUserForModerator/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    public ResponseEntity<?> updateUserForModerator(@PathVariable("userId") int userId, @RequestBody RegisterRequest registerRequest){
+        Users userUpdateModerator = (Users) userService.findById(userId);
+        userUpdateModerator.setStatusUser(registerRequest.isStatusUser());
+        userUpdateModerator.setRanks(registerRequest.getRanks());
+        userService.saveOrUpdate(userUpdateModerator);
+        return ResponseEntity.ok(new MessageResponse("Update successfully!"));
+    }
+
+    //    ----------------------- ROLE : USER ------------------------
+    @PutMapping("updateUserForUser/{userId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> updateUserForUser(@PathVariable("userId") int userId, @RequestBody RegisterRequest registerRequest){
+        if (userService.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already"));
+        }
+        Users userUpdateUser = (Users) userService.findById(userId);
+        userUpdateUser.setFirstName(registerRequest.getFirstName());
+        userUpdateUser.setLastName(registerRequest.getLastName());
+        userUpdateUser.setPhone(registerRequest.getPhone());
+        userUpdateUser.setAddress(registerRequest.getAddress());
+        userUpdateUser.setEmail(registerRequest.getEmail());
+        userUpdateUser.setState(registerRequest.getState());
+        userUpdateUser.setCity(registerRequest.getCity());
+        userUpdateUser.setPost(registerRequest.getPost());
+        userUpdateUser.setAvatar(registerRequest.getAvatar());
+        userUpdateUser.setBirtDate(registerRequest.getBirtDate());
+        userService.saveOrUpdate(userUpdateUser);
+        return ResponseEntity.ok(new MessageResponse("Update successfully!"));
     }
 
 

@@ -85,12 +85,18 @@ public class UserServiceImple implements UserService {
     }
     @Override
     public Users findById(Integer id) {
-        return null;
+        return userRepository.findById(id).get();
     }
     @Override
     public Page<Users> findByName(String name, Pageable pageable) {
         return userRepository.findByUserNameContaining(name, pageable);
     }
+
+    @Override
+    public List<Users> findAll() {
+        return userRepository.findAll();
+    }
+
     @Override
     public UserDto mapUserToUserDto(Users users) {
         UserDto userDto = new UserDto();
