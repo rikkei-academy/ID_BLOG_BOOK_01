@@ -83,7 +83,7 @@ public class UserServiceImple implements UserService {
 
     @Override
     public Users saveOrUpdate(Users users) {
-        return null;
+        return userRepository.save(users);
     }
 
     @Override
@@ -121,6 +121,8 @@ public class UserServiceImple implements UserService {
 
     @Override
     public Users findByEmail(String email) {
-        return findByEmail(email);
+
+        return userRepository.findByEmail(email);
+
     }
 }
