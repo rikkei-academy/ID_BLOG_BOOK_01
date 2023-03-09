@@ -15,4 +15,5 @@ public interface UserService extends RootService<Users,Integer> {
     boolean existsByEmail(String email);
     List<Users> getAllByFilter(List<Filter> listFilter);
     UserDto mapUserToUserDto(Users users);
+    Users findByEmail(String email);
 }
