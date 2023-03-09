@@ -81,7 +81,7 @@ public class UserServiceImple implements UserService {
     }
     @Override
     public Users saveOrUpdate(Users users) {
-        return null;
+        return userRepository.save(users);
     }
     @Override
     public Users findById(Integer id) {
