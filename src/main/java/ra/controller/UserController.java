@@ -73,7 +73,7 @@ public class UserController {
                 order = new Sort.Order(Sort.Direction.DESC, sortBy);
             }
             Pageable pageable = PageRequest.of(page, size, Sort.by(order));
-            Page<Users> users = userService.listUser(pageable);
+            Page<Users> users = userService.getAllList(pageable);
             Page<UserDto> userDtos = users.map(users1 -> {
                 UserDto userDto = userService.mapUserToUserDto(users1);
                 return userDto;
@@ -407,5 +407,6 @@ public class UserController {
         }
         return ResponseEntity.ok(new MessageResponse("Change password successfully!"));
     }
+
 
 }

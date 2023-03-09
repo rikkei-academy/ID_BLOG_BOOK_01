@@ -15,7 +15,7 @@ public class AuthorServiceImple implements AuthorService {
     @Autowired
     private AuthorRepository authorRepository;
     @Override
-    public Page<Author> listUser(Pageable pageable) {
+    public Page<Author> getAllList(Pageable pageable) {
         return authorRepository.findAll(pageable);
     }
 

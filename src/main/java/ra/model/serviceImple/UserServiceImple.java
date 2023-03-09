@@ -3,8 +3,6 @@ package ra.model.serviceImple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ra.dto.response.UserDto;
@@ -13,7 +11,6 @@ import ra.model.entity.Roles;
 import ra.model.entity.Users;
 import ra.model.repository.UserRepository;
 import ra.model.service.UserService;
-import ra.security.CustomUserDetails;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -76,7 +73,7 @@ public class UserServiceImple implements UserService {
         return usersList;
     }
     @Override
-    public Page<Users> listUser(Pageable pageable) {
+    public Page<Users> getAllList(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
     @Override

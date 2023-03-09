@@ -71,7 +71,7 @@ public class AuthorController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Author> pageListAuthor = authorService.listUser(pageable);
+        Page<Author> pageListAuthor = authorService.getAllList(pageable);
         Map<String, Object> data = new HashMap<>();
 //        Dữ liệu trả về trên 1 trang
         data.put("authors",pageListAuthor.getContent());
@@ -122,7 +122,7 @@ public class AuthorController {
             order = new Sort.Order(Sort.Direction.DESC,"authorId");
         }
         Pageable pageable = PageRequest.of(page, size,Sort.by(order));
-        Page<Author> pageAuthor = authorService.listUser(pageable);
+        Page<Author> pageAuthor = authorService.getAllList(pageable);
         Map<String, Object> data = new HashMap<>();
 //        Dữ liệu trả về trên 1 trang
         data.put("authors",pageAuthor.getContent());
@@ -148,7 +148,7 @@ public class AuthorController {
             order = new Sort.Order(Sort.Direction.DESC,"authorId");
         }
         Pageable pageable = PageRequest.of(page, size,Sort.by(order));
-        Page<Author> pageAuthor = authorService.listUser(pageable);
+        Page<Author> pageAuthor = authorService.getAllList(pageable);
         Map<String, Object> data = new HashMap<>();
 //        Dữ liệu trả về trên 1 trang
         data.put("authors",pageAuthor.getContent());
