@@ -33,7 +33,6 @@ public class PassResetController {
 
     @GetMapping("/resetPassword")
     public ResponseEntity<?> resetPassword(@RequestParam("email") String userEmail, HttpServletRequest request) {
-//        Users user = (Users) userService.findByUserName(userEmail);
         if (userService.existsByEmail(userEmail)) {
             Users users = (Users) userService.findByEmail(userEmail);
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(users.getUserName());
