@@ -13,8 +13,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import ra.dto.request.ChangePassword;
 import ra.dto.request.RegisterRequest;
 import ra.dto.request.UserLogin;
 import ra.dto.response.JwtResponse;
@@ -388,5 +390,22 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("Update successfully!"));
     }
 
+    @PostMapping("changePassword")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePassword changePassword){
+//        USER dang dang nhap
+        CustomUserDetails usersChangePass = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users users = userService.findUsersByUserName(usersChangePass.getUsername());
+//        thong tin request
+        String userName = changePassword.getUserName();
+        String oldPass = changePassword.getOldPass();
+        String newPass = changePassword.getNewPass();
+
+        if (usersChangePass.getUsername().equals(userName)&& BCrypt.checkpw(oldPass,usersChangePass.getPassword())){
+            users.setPasswords(encoder.encode(newPass));
+            userService.saveOrUpdate(users);
+        }
+        return ResponseEntity.ok(new MessageResponse("Change password successfully!"));
+    }
 
 }
