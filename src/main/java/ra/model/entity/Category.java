@@ -1,8 +1,11 @@
 package ra.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,4 +19,7 @@ public class Category {
     private String catalogName;
     @Column(name = "CatalogStatus",columnDefinition = "nvarchar(100)")
     private boolean catalogStatus;
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "Category")
+//    List<Book> bookList = new ArrayList<>();
 }
