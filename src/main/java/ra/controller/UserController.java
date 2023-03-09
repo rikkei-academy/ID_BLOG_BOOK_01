@@ -202,7 +202,14 @@ public class UserController {
         }
         user.setListRoles(listRoles);
         userService.saveOrUpdate(user);
-        return ResponseEntity.ok(new MessageResponse("User registered successfully"));
+        return ResponseEntity.ok(new MessageResponse("User registered successful"));
+    }
+
+    @GetMapping("/logOut")
+    public ResponseEntity<?> logOut() {
+        // Clear the authentication from server-side (in this case, Spring Security)
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Logout successful");
     }
 
 
