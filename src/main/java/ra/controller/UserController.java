@@ -53,24 +53,29 @@ public class UserController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String direction,
             @RequestParam String sortBy) {
-        Sort.Order order;
-        if (direction.equals("asc")) {
-            order = new Sort.Order(Sort.Direction.ASC, sortBy);
-        } else {
-            order = new Sort.Order(Sort.Direction.DESC, sortBy);
-        }
-        Pageable pageable = PageRequest.of(page, size, Sort.by(order));
-        Page<Users> users = userService.listUser(pageable);
-        Page<UserDto> userDtos = users.map(users1 -> {
-            UserDto userDto = userService.mapUserToUserDto(users1);
-            return userDto;
-        });
         Map<String, Object> data = new HashMap<>();
-        data.put("usersDto", userDtos.getContent());
-        data.put("total", userDtos.getSize());
-        data.put("totalItems", userDtos.getTotalElements());
-        data.put("totalPages", userDtos.getTotalPages());
-        return new ResponseEntity<>(data, HttpStatus.OK);
+        try {
+            Sort.Order order;
+            if (direction.equals("asc")) {
+                order = new Sort.Order(Sort.Direction.ASC, sortBy);
+            } else {
+                order = new Sort.Order(Sort.Direction.DESC, sortBy);
+            }
+            Pageable pageable = PageRequest.of(page, size, Sort.by(order));
+            Page<Users> users = userService.listUser(pageable);
+            Page<UserDto> userDtos = users.map(users1 -> {
+                UserDto userDto = userService.mapUserToUserDto(users1);
+                return userDto;
+            });
+            data.put("usersDto", userDtos.getContent());
+            data.put("total", userDtos.getSize());
+            data.put("totalItems", userDtos.getTotalElements());
+            data.put("totalPages", userDtos.getTotalPages());
+            return new ResponseEntity<>(data, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @PostMapping("/signin")
