@@ -1,24 +1,26 @@
-        package ra.controller;
-        import lombok.AllArgsConstructor;
-        import org.springframework.http.HttpStatus;
-        import org.springframework.http.ResponseEntity;
-        import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-        import org.springframework.security.core.context.SecurityContextHolder;
-        import org.springframework.security.core.userdetails.UserDetails;
-        import org.springframework.security.crypto.password.PasswordEncoder;
-        import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-        import org.springframework.web.bind.annotation.*;
-        import ra.dto.response.MessageResponse;
-        import ra.model.entity.PasswordResetToken;
-        import ra.model.entity.Users;
-        import ra.model.sendEmail.ProvideSendEmail;
-        import ra.model.service.PassResetService;
-        import ra.model.service.UserService;
-        import ra.security.CustomUserDetails;
-        import ra.security.CustomUserDetailsService;
-        import javax.servlet.http.HttpServletRequest;
-        import java.util.Date;
-        import java.util.UUID;
+package ra.controller;
+
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.bind.annotation.*;
+import ra.dto.response.MessageResponse;
+import ra.model.entity.PasswordResetToken;
+import ra.model.entity.Users;
+import ra.model.sendEmail.ProvideSendEmail;
+import ra.model.service.PassResetService;
+import ra.model.service.UserService;
+import ra.security.CustomUserDetails;
+import ra.security.CustomUserDetailsService;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
@@ -42,8 +44,8 @@ public class PassResetController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = UUID.randomUUID().toString();
             PasswordResetToken myToken = new PasswordResetToken();
-            myToken.setToken( token);
-            String mess= "token is valid for 5 minutes.\n"+"Your token: " +token;
+            myToken.setToken(token);
+            String mess = "token is valid for 5 minutes.\n" + "Your token: " + token;
             myToken.setUsers(users);
             Date now = new Date();
             myToken.setStartDate(now);
@@ -55,6 +57,7 @@ public class PassResetController {
             return new ResponseEntity<>(new MessageResponse("Email is not already"), HttpStatus.EXPECTATION_FAILED);
         }
     }
+
     @PostMapping("/creatNewPass")
     public ResponseEntity<?> creatNewPass(@RequestParam("token") String token, @RequestParam("newPassword") String newPassword) {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
