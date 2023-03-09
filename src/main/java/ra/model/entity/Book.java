@@ -38,5 +38,8 @@ public class Book {
     private int sale;
     @Column(name ="BookStatus" )
     private boolean bookStatus;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "authorId", referencedColumnName = "authorId")
+    private Author author;
 
 }

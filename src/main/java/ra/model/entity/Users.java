@@ -1,5 +1,6 @@
 package ra.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,6 +42,7 @@ public class Users {
     @Column(name = "Avatar")
     private String avatar;
     @Column(name = "BirtDate")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate birtDate;
     @Column(name = "StatusUser")
     private boolean statusUser;
