@@ -1,5 +1,10 @@
 package ra.dto.response;
 
+
+import lombok.Data;
+
+@Data
+
 public class MessageResponse {
     private String message;
 
@@ -15,3 +20,5 @@ public class MessageResponse {
         this.message = message;
     }
 }
+
+
