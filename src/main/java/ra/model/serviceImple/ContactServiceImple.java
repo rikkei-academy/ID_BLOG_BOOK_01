@@ -8,6 +8,9 @@ import ra.dto.request.ContactRequest;
 import ra.model.entity.Contact;
 import ra.model.repository.ContactRepository;
 import ra.model.service.ContactService;
+
+import java.util.List;
+
 @Service
 public class ContactServiceImple implements ContactService {
     @Autowired private ContactRepository contactRepo;
@@ -28,6 +31,11 @@ public class ContactServiceImple implements ContactService {
 
     @Override
     public Page<Contact> findByName(String name ,Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public List<Contact> findAll() {
         return null;
     }
     @Override

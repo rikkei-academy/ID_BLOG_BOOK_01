@@ -1,10 +1,8 @@
 package ra.model.serviceImple;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ra.model.entity.PasswordResetToken;
 import ra.model.repository.PassResetRepository;
 import ra.model.service.PassResetService;
-@Service
 public class PassResetServiceImple implements PassResetService{
     @Autowired
     private PassResetRepository passResetRepository;
