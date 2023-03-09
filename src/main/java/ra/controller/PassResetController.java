@@ -18,7 +18,6 @@ import ra.model.service.PassResetService;
 import ra.model.service.UserService;
 import ra.security.CustomUserDetails;
 import ra.security.CustomUserDetailsService;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.UUID;
