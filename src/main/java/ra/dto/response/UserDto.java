@@ -25,5 +25,4 @@ public class UserDto{
     private boolean statusUser;
     private int ranks;
     private List<String> listRoles ;
-
 }
