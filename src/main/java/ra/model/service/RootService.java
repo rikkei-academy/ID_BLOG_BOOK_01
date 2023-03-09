@@ -7,7 +7,7 @@ import java.util.List;
 
 
 public interface RootService<T,V> {
-    Page<T> listUser(Pageable pageable);
+    Page<T> getAllList(Pageable pageable);
     T saveOrUpdate(T t);
     T findById(V id);
     Page<T> findByName(String name, Pageable pageable);

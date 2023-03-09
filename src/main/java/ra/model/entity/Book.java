@@ -1,7 +1,5 @@
 package ra.model.entity;
-
 import lombok.Data;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,5 +39,5 @@ public class Book {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "authorId", referencedColumnName = "authorId")
     private Author author;
-
 }
+
