@@ -53,4 +53,7 @@ public class Users {
     @OneToMany(mappedBy = "users")
     @JsonIgnore
     private List<LikeBook> listLikeBook = new ArrayList<>();
+    @OneToMany(mappedBy = "users")
+    @JsonIgnore
+    List<Carts> cartList = new ArrayList<>();
 }

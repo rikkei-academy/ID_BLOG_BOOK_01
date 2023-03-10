@@ -2,7 +2,6 @@ package ra.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,5 +45,8 @@ public class Book {
     @OneToMany(mappedBy = "book")
     @JsonIgnore
     private List<LikeBook> listLikeBook = new ArrayList<>();
-
+    @OneToMany (mappedBy = "book")
+    @JsonIgnore
+    private List<CartDetail> cartDetails= new ArrayList<>();
 }
+
