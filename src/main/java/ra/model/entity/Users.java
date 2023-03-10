@@ -1,14 +1,11 @@
 package ra.model.entity;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Data
@@ -41,6 +38,7 @@ public class Users {
     @Column(name = "Avatar")
     private String avatar;
     @Column(name = "BirtDate")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate birtDate;
     @Column(name = "StatusUser")
     private boolean statusUser;
@@ -50,6 +48,7 @@ public class Users {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable( name = "user_role", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "roleId"))
     private Set<Roles> listRoles = new HashSet<>();
+
     //tạo bảng wishList
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "wishlist",joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "bookId"))
@@ -58,4 +57,12 @@ public class Users {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "star",joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "bookId"))
     private Set<Book> star = new HashSet<>();
+
+    @OneToMany(mappedBy = "users")
+    @JsonIgnore
+    private List<LikeBook> listLikeBook = new ArrayList<>();
+    @OneToMany(mappedBy = "users")
+    @JsonIgnore
+    List<Carts> cartList = new ArrayList<>();
+
 }
