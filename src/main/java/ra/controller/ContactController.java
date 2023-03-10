@@ -20,7 +20,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/contact")
 public class ContactController {
     @Autowired private ContactService contactService;
-    @GetMapping("/getPagingAndSort")
+    @GetMapping("/get_paging_and_sort")
     public ResponseEntity<Map<String, Object>> getPagingAndSortByName(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -46,12 +46,12 @@ public class ContactController {
         }
 
     }
-    @GetMapping("/searchByNameOrPhone")
+    @GetMapping("/search_by_email_or_phone")
     public ResponseEntity<Map<String, Object>> searchByNameOrPhone(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam String email,
-            @RequestParam String phone){
+            @RequestParam(defaultValue = "") String email,
+            @RequestParam(defaultValue = "") String phone){
         Map<String, Object> data = new HashMap<>();
         try {
             Pageable pageable = PageRequest.of(page, size);
@@ -65,7 +65,7 @@ public class ContactController {
             return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
         }
     }
-    @PostMapping("/creatContact")
+    @PostMapping("/creat_contact")
     public ResponseEntity<?>creatContact(@RequestBody Contact contact){
         try {
             Contact result=contactService.saveOrUpdate(contact);
@@ -74,8 +74,8 @@ public class ContactController {
             return new ResponseEntity<>( HttpStatus.BAD_REQUEST);
         }
     }
-    @PutMapping("/updateContact")
-    public ResponseEntity<?> updateContact(@RequestBody Contact contact){
+    @PutMapping("/update/{contactId}")
+    public ResponseEntity<?> updateContact(@PathVariable int contactId,@RequestBody Contact contact){
         try {
             Contact result = contactService.saveOrUpdate(contact);
             return new ResponseEntity<>(result, HttpStatus.OK);
@@ -83,8 +83,8 @@ public class ContactController {
             return new ResponseEntity<>( HttpStatus.BAD_REQUEST);
         }
     }
-    @DeleteMapping("/deleteContact")
-    public ResponseEntity<?>deleteContact(@RequestParam int contactId){
+    @DeleteMapping("/delete/{contactId}")
+    public ResponseEntity<?>deleteContact(@PathVariable int contactId){
         try{
             Contact contact =contactService.findById(contactId);
             contact.setStatus(false);
