@@ -108,7 +108,6 @@ public class AuthorController {
         }
 
     }
-
     @GetMapping("getAuthorPagingAndSortById")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<Map<String, Object>> getPagingAndSortingById(
