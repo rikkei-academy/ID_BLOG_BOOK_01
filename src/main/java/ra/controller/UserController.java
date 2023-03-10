@@ -62,7 +62,7 @@ public class UserController {
         return ResponseEntity.ok().body(userDtos);
     }
 
-    @GetMapping("/getPagingAndSort")
+    @GetMapping("/get_paging_and_Sort")
     public ResponseEntity<Map<String, Object>> getPagingAndSortByName(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -102,7 +102,6 @@ public class UserController {
         CustomUserDetails customUserDetail = (CustomUserDetails) authentication.getPrincipal();
         //Sinh JWT tra ve client
         String jwt = tokenProvider.generateToken(customUserDetail);
-        System.out.println(jwt);
         //Lay cac quyen cua user
         List<String> listRoles = customUserDetail.getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
@@ -111,7 +110,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/searchByUserName")
+    @GetMapping("/search_by_userName")
     public ResponseEntity<Map<String, Object>> searchByUserName(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -134,8 +133,8 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/blockUser")
-    public ResponseEntity<?> blockUser(Integer userId) {
+    @DeleteMapping("/block_user/{userId}")
+    public ResponseEntity<?> blockUser(@PathVariable int userId) {
         try {
             CustomUserDetails customUserDetail = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Users users = (Users) userService.findById(userId);

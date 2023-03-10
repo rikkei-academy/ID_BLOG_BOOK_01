@@ -22,7 +22,7 @@ import java.util.Map;
 public class TagController {
     private TagService tagService;
 
-    @GetMapping("/getPagingAndSort")
+    @GetMapping("/get_paging_and_sort")
     public ResponseEntity<Map<String, Object>> getPagingAndSort(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -48,11 +48,11 @@ public class TagController {
         }
     }
 
-    @GetMapping("/searchByName/{tagName}/{page}/{size}")
+    @GetMapping("/search_by_name")
     public ResponseEntity<Map<String, Object>> searchByName(
-            @PathVariable String tagName,
-            @PathVariable int page,
-            @PathVariable int size) {
+            @RequestParam  String tagName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         Map<String, Object> data = new HashMap<>();
         try {
             Pageable pageable = PageRequest.of(page, size);
@@ -67,7 +67,7 @@ public class TagController {
         }
     }
 
-    @PostMapping("/creatNewTag")
+    @PostMapping("/creat_new_tag")
     public ResponseEntity<?> creatNewTag(@RequestBody TagRequest request) {
         try {
             Tag result = tagService.saveOrUpdate(tagService.mapTagRequestToTag(request));

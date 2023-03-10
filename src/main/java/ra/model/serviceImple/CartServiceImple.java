@@ -13,6 +13,7 @@ import ra.model.service.CartService;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -21,15 +22,10 @@ public class CartServiceImple implements CartService {
     @Autowired private CartRepository cartRepository;
     @Override
     public Page<Carts> getAllList(Pageable pageable) {
-        Page<Carts> carts=cartRepository.findAll(pageable);
-        Iterator<Carts> iterator = carts.iterator();
-        while (iterator.hasNext()){
-            Carts carts1 = iterator.next();
-            if (carts1.getCartStatus()==0){
-                iterator.remove();
-            }
-        }
-        return cartRepository.findAll(pageable);
+        List<Integer> status=new ArrayList<>();
+        status.add(0);
+        Page<Carts> carts=cartRepository.findByCartStatusNotIn(status,pageable);
+        return carts;
     }
     @Override
     public Carts saveOrUpdate(Carts carts) {

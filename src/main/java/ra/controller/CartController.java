@@ -11,10 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ra.dto.request.CartConfirm;
 import ra.dto.request.CartDetailRequest;
-import ra.model.entity.Book;
-import ra.model.entity.CartDetail;
-import ra.model.entity.Carts;
-import ra.model.entity.Users;
+import ra.model.entity.*;
 import ra.model.sendEmail.ProvideSendEmail;
 import ra.model.service.BookService;
 import ra.model.service.CartDetailService;
@@ -40,7 +37,7 @@ public class CartController {
     private UserService userService;
     private CartDetailService cartDetailService;
 
-        @GetMapping("/getPagingAndSort")
+    @GetMapping("/get_paging_and_sort")
     public ResponseEntity<Map<String, Object>> getPagingAndSort(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -65,8 +62,26 @@ public class CartController {
             return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
         }
     }
+    @GetMapping ("/search_by_name")
+    public ResponseEntity<?> searchByName(
+            @RequestParam String searchName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+        Map<String, Object> data = new HashMap<>();
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Carts> tags = cartService.findByName(searchName, pageable);
+            data.put("tags", tags.getContent());
+            data.put("total", tags.getSize());
+            data.put("totalItems", tags.getTotalElements());
+            data.put("totalPages", tags.getTotalPages());
+            return new ResponseEntity<>(data, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
+        }
+    }
 
-    @PutMapping("/addToCart")
+    @PutMapping("/add_to_cart")
     public ResponseEntity<?> addToCart(@RequestBody CartDetailRequest cartDetailRequest, @RequestParam String action) {
         CartDetail cartDetail = null;
         try {
@@ -75,7 +90,7 @@ public class CartController {
                 if (action.equals("Add more")) {
                     cartDetail.setQuantity(cartDetail.getQuantity() + cartDetailRequest.getQuantity());
                 } else if (action.equals("Edit")) {
-                        cartDetail.setQuantity(cartDetailRequest.getQuantity());
+                    cartDetail.setQuantity(cartDetailRequest.getQuantity());
                 }
                 cartDetailService.saveOrUpdate(cartDetail);
                 return new ResponseEntity<>(cartDetail, HttpStatus.OK);
@@ -94,8 +109,8 @@ public class CartController {
         }
     }
 
-    @DeleteMapping("/deleteCartDetail")
-    public ResponseEntity<?> deleteCartDetail(@RequestParam int detailId) {
+    @DeleteMapping("/delete_cart_detail/{detailId}")
+    public ResponseEntity<?> deleteCartDetail(@PathVariable int detailId) {
         try {
             cartDetailService.deleteByCartDetailId(detailId);
             return ResponseEntity.ok().body("Delete successfully");
@@ -103,40 +118,41 @@ public class CartController {
             return ResponseEntity.ok().body("Delete error");
         }
     }
-    @PutMapping("/checkout")
-    public ResponseEntity<?>checkout(@RequestBody CartConfirm confirm){
-        CustomUserDetails customUserDetails= (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Carts cart =cartService.findById(confirm.getCartId());
+
+    @PutMapping("/check_out")
+    public ResponseEntity<?> checkout(@RequestBody CartConfirm confirm) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Carts cart = cartService.findById(confirm.getCartId());
         try {
-            Carts result= cartService.saveOrUpdate(cartService.mapCartConfirmToCart(cart,confirm));
+            Carts result = cartService.saveOrUpdate(cartService.mapCartConfirmToCart(cart, confirm));
             for (CartDetail detail : result.getCartDetails()) {
-                Book book= detail.getBook();
-                book.setQuantity(book.getQuantity()-detail.getQuantity());
+                Book book = detail.getBook();
+                book.setQuantity(book.getQuantity() - detail.getQuantity());
                 bookService.saveOrUpdate(book);
             }
             String subject = "Payment successfully: " + result.getCartName();
             String mess = "Thanks for payment. Thank you for your purchase. Your order is being confirmed. Delivery time will be updated after successful confirmation. Please check your email for the latest information.\n" +
                     "Detail oder:\n";
             String sDetail = "";
-            float total=0;
+            float total = 0;
             for (CartDetail detail : result.getCartDetails()) {
-                sDetail += detail.getBook().getBookName() +  " x" + detail.getQuantity() + " " + " x" + detail.getPrice() + "vnd" + "\n";
-                total+= detail.getQuantity()*detail.getPrice();
+                sDetail += detail.getBook().getBookName() + " x" + detail.getQuantity() + " " + " x" + detail.getPrice() + "vnd" + "\n";
+                total += detail.getQuantity() * detail.getPrice();
             }
             mess = mess + sDetail +
                     "-------------------------------------------------\n" +
-                    "Total: " + total*result.getDiscount() + "vnd.\n" +
-                    "Full name: " + result.getLastName()+" "+result.getFirstName() + ".\n" +
+                    "Total: " + total * result.getDiscount() + "vnd.\n" +
+                    "Full name: " + result.getLastName() + " " + result.getFirstName() + ".\n" +
                     "Phone: " + result.getPhone() + ".\n" +
-                    "Address: " + result.getCity()+" "+result.getState()+" "+result.getAddress()
+                    "Address: " + result.getCity() + " " + result.getState() + " " + result.getAddress()
             ;
-//            provideSendEmail.sendSimpleMessage(result.getEmail(),
-//                    subject, mess);
+            provideSendEmail.sendSimpleMessage(result.getEmail(),
+                    subject, mess);
             Carts newCart = new Carts();
             newCart.setUsers((Users) userService.findById(customUserDetails.getUserId()));
-             Carts pendingCart= cartService.saveOrUpdate(newCart);
-              return new ResponseEntity<>(pendingCart, HttpStatus.OK);
-        }catch (Exception e){
+            Carts pendingCart = cartService.saveOrUpdate(newCart);
+            return new ResponseEntity<>(pendingCart, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
