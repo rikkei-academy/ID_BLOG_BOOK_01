@@ -57,7 +57,6 @@ public class Book {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable( name = "Tag_Book", joinColumns = @JoinColumn(name = "bookId"), inverseJoinColumns = @JoinColumn(name = "tagId"))
     private List<Tag> tagList= new ArrayList<>();
-}
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserId")
