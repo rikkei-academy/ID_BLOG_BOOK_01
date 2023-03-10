@@ -16,4 +16,6 @@ public interface UserService extends RootService<Users,Integer> {
     List<Users> getAllByFilter(List<Filter> listFilter);
     UserDto mapUserToUserDto(Users users);
     Users findByEmail(String email);
+    List<Users> getAll();
+
 }

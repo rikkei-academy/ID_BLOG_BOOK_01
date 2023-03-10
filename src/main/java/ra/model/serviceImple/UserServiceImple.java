@@ -5,12 +5,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ra.dto.response.UserDto;
+import ra.model.entity.Book;
 import ra.model.entity.Filter;
 import ra.model.entity.Roles;
 import ra.model.entity.Users;
+import ra.model.repository.BookRepository;
 import ra.model.repository.UserRepository;
 import ra.model.service.UserService;
 import ra.security.CustomUserDetails;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 public class UserServiceImple implements UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BookRepository bookRepository;
 
     @Override
     public Users findUsersByUserName(String userName) {
@@ -50,7 +55,7 @@ public class UserServiceImple implements UserService {
                 case "status":
                     while (iterator.hasNext()) {
                         Users user = iterator.next();
-                        if (user.isStatusUser()!=Boolean.parseBoolean(rule.getRulesValue())) {
+                        if (user.isStatusUser() != Boolean.parseBoolean(rule.getRulesValue())) {
                             iterator.remove();
                         }
                     }
@@ -75,18 +80,22 @@ public class UserServiceImple implements UserService {
         }
         return usersList;
     }
+
     @Override
     public Page<Users> listUser(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
+
     @Override
     public Users saveOrUpdate(Users users) {
         return userRepository.save(users);
     }
+
     @Override
     public Users findById(Integer id) {
         return userRepository.findById(id).get();
     }
+
     @Override
     public Page<Users> findByName(String name, Pageable pageable) {
         return userRepository.findByUserNameContaining(name, pageable);
@@ -124,4 +133,10 @@ public class UserServiceImple implements UserService {
     public Users findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    @Override
+    public List<Users> getAll() {
+        return userRepository.findAll();
+    }
+
 }

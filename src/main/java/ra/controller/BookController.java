@@ -7,10 +7,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import ra.model.entity.Book;
 import ra.model.entity.ResponseObject;
+
 import ra.model.serviceImple.BookServiceImp;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +26,6 @@ import java.util.Map;
 public class BookController {
     @Autowired
     private BookServiceImp bookServiceImp;
-
     @GetMapping
     public List<Book> getAll() {
         return bookServiceImp.getAll();
@@ -107,6 +109,4 @@ public class BookController {
         data.put("totalPages", pageBook.getTotalPages());
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
-
-
 }

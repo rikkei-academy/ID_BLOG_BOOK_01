@@ -15,4 +15,6 @@ public interface BookService {
     List<Book> searchName(String bookName);
     List<Book> sortByName(String direction);
     Page<Book> getPagging(Pageable pageable);
+    List<Book> getAllWishList(int userId);
+
 }
