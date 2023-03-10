@@ -60,6 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/author/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
                 .antMatchers("/api/v1/likeBook/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
                 .antMatchers("/api/v1/contact/**").permitAll()
+                .antMatchers("/api/v1/tag/**").permitAll()
                 .antMatchers("/api/v1/cart/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
 
                 .antMatchers("/api/v1/comment/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
