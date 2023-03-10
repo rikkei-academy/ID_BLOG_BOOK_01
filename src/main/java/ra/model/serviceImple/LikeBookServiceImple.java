@@ -14,8 +14,10 @@ import java.util.List;
 public class LikeBookServiceImple implements LikeBookService {
     @Autowired
     private LikeBookRepository likeBookRepository;
+
+
     @Override
-    public Page<LikeBook> listUser(Pageable pageable) {
+    public Page<LikeBook> getAllList(Pageable pageable) {
         return null;
     }
 

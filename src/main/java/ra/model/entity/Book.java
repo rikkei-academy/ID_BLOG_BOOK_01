@@ -48,5 +48,8 @@ public class Book {
     @OneToMany (mappedBy = "book")
     @JsonIgnore
     private List<CartDetail> cartDetails= new ArrayList<>();
+    @OneToMany(mappedBy = "book")
+    @JsonIgnore
+    private List<Comment> listComment = new ArrayList<>();
 }
 

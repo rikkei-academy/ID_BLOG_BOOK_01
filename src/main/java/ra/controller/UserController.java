@@ -410,5 +410,4 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("Change password successfully!"));
     }
 
-
 }
