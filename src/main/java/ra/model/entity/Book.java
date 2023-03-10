@@ -40,6 +40,9 @@ public class Book {
     @Column(name ="BookStatus" )
     private boolean bookStatus;
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "CatalogId")
+    private Category catalog;
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "authorId", referencedColumnName = "authorId")
     private Author author;
     @OneToMany(mappedBy = "book")
@@ -56,3 +59,7 @@ public class Book {
     private List<Tag> tagList= new ArrayList<>();
 }
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserId")
+    private Users users;
+}

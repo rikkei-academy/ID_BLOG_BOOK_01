@@ -19,12 +19,15 @@ import org.springframework.web.bind.annotation.*;
 import ra.dto.request.ChangePassword;
 import ra.dto.request.RegisterRequest;
 import ra.dto.request.UserLogin;
+import ra.dto.response.DisplayBook;
 import ra.dto.response.JwtResponse;
 import ra.dto.response.MessageResponse;
 import ra.dto.response.UserDto;
 import ra.jwt.JwtTokenProvider;
 import ra.model.entity.*;
 import ra.model.service.CartService;
+import ra.model.entity.*;
+import ra.model.service.BookService;
 import ra.model.service.RoleService;
 import ra.model.service.UserService;
 import ra.security.CustomUserDetails;
@@ -44,6 +47,8 @@ public class UserController {
     private PasswordEncoder encoder;
 
     private RoleService roleService;
+    @Autowired
+    private BookService bookService;
     private CartService cartService;
 
     @GetMapping("/getAllByFilter")
@@ -105,6 +110,7 @@ public class UserController {
                 customUserDetail.getAddress(), customUserDetail.getState(), customUserDetail.getCity(), customUserDetail.getPost(), customUserDetail.getPhone(), customUserDetail.getAvatar(), customUserDetail.getRanks(), listRoles,customUserDetail.getCarts().get(customUserDetail.getCarts().size()-1));
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/searchByUserName")
     public ResponseEntity<Map<String, Object>> searchByUserName(
             @RequestParam(defaultValue = "0") int page,
@@ -409,5 +415,61 @@ public class UserController {
         }
         return ResponseEntity.ok(new MessageResponse("Change password successfully!"));
     }
+    @PutMapping("addWishList/{bookId}")
+    public ResponseEntity<?> addToWishList(@PathVariable("bookId")int bookId){
+        Book book = bookService.getById(bookId);
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userService.findById(customUserDetails.getUserId());
+        user.getWishList().add(book);
+        try {
 
+            userService.saveOrUpdate(user);
+            return ResponseEntity.ok("Đã thêm sản phẩm vào danh mục ưa thích");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("Có lỗi trong quá trình xử lý vui lòng thử lại!");
+        }
+    }
+
+    @PutMapping("removeWishList/{bookId}")
+    public ResponseEntity<?> removeWishList(@PathVariable("bookId")int bookId){
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userService.findById(customUserDetails.getUserId());
+        for (Book book :user.getWishList()) {
+            if (book.getBookId()==bookId){
+                user.getWishList().remove(bookService.getById(bookId));
+                break;
+            }
+        }
+        try {
+            userService.saveOrUpdate(user);
+            return ResponseEntity.ok("Đã bỏ yêu thích sản phẩm này!");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("Có lỗi trong quá trình xử lý vui lòng thử lại!");
+        }
+    }
+    @GetMapping("/new")
+    List<Users> getAll(){
+        return userService.getAll();
+    }
+    @GetMapping("getAllWishList")
+    public ResponseEntity<?> getAllWishList(){
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Book> listBook = bookService.getAllWishList(customUserDetails.getUserId());
+        List<DisplayBook> list = new ArrayList<>();
+        for (Book pro :listBook) {
+            DisplayBook displayBook = new DisplayBook();
+            displayBook.setBookId(pro.getBookId());
+            displayBook.setBookName(pro.getBookName());
+            displayBook.setBookTitle(pro.getBookTitle());
+            displayBook.setDescriptions(pro.getDescriptions());
+            displayBook.setSale(pro.getSale());
+            displayBook.setExportPrice(pro.getExportPrice());
+            displayBook.setImportPrice(pro.getImportPrice());
+            displayBook.setCategory(pro.getCatalog());
+            list.add(displayBook);
+        }
+        return ResponseEntity.ok(list);
+    }
 }

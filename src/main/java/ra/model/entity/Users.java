@@ -47,9 +47,18 @@ public class Users {
     private boolean statusUser;
     @Column(name = "Ranks")
     private int ranks;
+    //tạo bảng user_role
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable( name = "user_role", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "roleId"))
     private Set<Roles> listRoles = new HashSet<>();
+    //tạo bảng wishList
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "wishlist",joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "bookId"))
+    private Set<Book> wishList = new HashSet<>();
+    //tạo bảng Star
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "star",joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "bookId"))
+    private Set<Book> star = new HashSet<>();
     @OneToMany(mappedBy = "users")
     @JsonIgnore
     private List<LikeBook> listLikeBook = new ArrayList<>();

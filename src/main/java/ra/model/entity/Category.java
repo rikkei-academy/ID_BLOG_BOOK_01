@@ -21,5 +21,5 @@ public class Category {
     private boolean catalogStatus;
 //    @JsonIgnore
 //    @OneToMany(mappedBy = "Category")
-//    List<Book> bookList = new ArrayList<>();
+//    List<Book> listBook = new ArrayList<>();
 }

@@ -14,6 +14,7 @@ import java.util.List;
 public class BookServiceImp implements BookService {
     @Autowired
     private BookRepository bookRepository;
+
     @Override
     public List<Book> getAll() {
         return bookRepository.findAll();
@@ -53,4 +54,10 @@ public class BookServiceImp implements BookService {
     public Page<Book> getPagging(Pageable pageable) {
         return bookRepository.findAll(pageable);
     }
+
+    @Override
+    public List<Book> getAllWishList(int userId) {
+        return bookRepository.getAllWishList(userId);
+    }
+
 }
