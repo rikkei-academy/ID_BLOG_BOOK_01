@@ -52,5 +52,8 @@ public class Users {
     private Set<Roles> listRoles = new HashSet<>();
     @OneToMany(mappedBy = "users")
     @JsonIgnore
+    private List<LikeBook> listLikeBook = new ArrayList<>();
+    @OneToMany(mappedBy = "users")
+    @JsonIgnore
     List<Carts> cartList = new ArrayList<>();
 }
