@@ -106,7 +106,6 @@ public class AuthorController {
         } catch (Exception ex) {
             return new ResponseEntity<>(data,HttpStatus.BAD_REQUEST);
         }
-
     }
     @GetMapping("getAuthorPagingAndSortById")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
