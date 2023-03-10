@@ -13,8 +13,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import ra.dto.request.ChangePassword;
 import ra.dto.request.RegisterRequest;
 import ra.dto.request.UserLogin;
 import ra.dto.response.DisplayBook;
@@ -22,6 +24,8 @@ import ra.dto.response.JwtResponse;
 import ra.dto.response.MessageResponse;
 import ra.dto.response.UserDto;
 import ra.jwt.JwtTokenProvider;
+import ra.model.entity.*;
+import ra.model.service.CartService;
 import ra.model.entity.*;
 import ra.model.service.BookService;
 import ra.model.service.RoleService;
@@ -39,20 +43,21 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider tokenProvider;
     private UserService userService;
-    @Autowired
+
     private PasswordEncoder encoder;
-    @Autowired
+
     private RoleService roleService;
     @Autowired
     private BookService bookService;
+    private CartService cartService;
 
     @GetMapping("/getAllByFilter")
     public ResponseEntity<?> getAllByFilter(@RequestBody List<Filter> list) {
         List<Users> usersList = userService.getAllByFilter(list);
         List<UserDto> userDtos = new ArrayList<>();
         for (Users u : usersList) {
-                UserDto userDto= userService.mapUserToUserDto(u);
-                userDtos.add(userDto);
+            UserDto userDto = userService.mapUserToUserDto(u);
+            userDtos.add(userDto);
         }
         return ResponseEntity.ok().body(userDtos);
     }
@@ -72,7 +77,7 @@ public class UserController {
                 order = new Sort.Order(Sort.Direction.DESC, sortBy);
             }
             Pageable pageable = PageRequest.of(page, size, Sort.by(order));
-            Page<Users> users = userService.listUser(pageable);
+            Page<Users> users = userService.getAllList(pageable);
             Page<UserDto> userDtos = users.map(users1 -> {
                 UserDto userDto = userService.mapUserToUserDto(users1);
                 return userDto;
@@ -82,13 +87,13 @@ public class UserController {
             data.put("totalItems", userDtos.getTotalElements());
             data.put("totalPages", userDtos.getTotalPages());
             return new ResponseEntity<>(data, HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
         }
 
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/signIn")
     public ResponseEntity<?> loginUser(@RequestBody UserLogin userLogin) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userLogin.getUserName(), userLogin.getPasswords())
@@ -102,7 +107,7 @@ public class UserController {
         List<String> listRoles = customUserDetail.getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
         JwtResponse response = new JwtResponse(customUserDetail.getUserId(), customUserDetail.getFirstName(), customUserDetail.getLastName(), jwt, customUserDetail.getUsername(), customUserDetail.getEmail(),
-                customUserDetail.getAddress(), customUserDetail.getState(), customUserDetail.getCity(), customUserDetail.getPost(), customUserDetail.getPhone(), customUserDetail.getAvatar(), customUserDetail.getRanks(), listRoles);
+                customUserDetail.getAddress(), customUserDetail.getState(), customUserDetail.getCity(), customUserDetail.getPost(), customUserDetail.getPhone(), customUserDetail.getAvatar(), customUserDetail.getRanks(), listRoles,customUserDetail.getCarts().get(customUserDetail.getCarts().size()-1));
         return ResponseEntity.ok(response);
     }
 
@@ -208,7 +213,11 @@ public class UserController {
             });
         }
         user.setListRoles(listRoles);
-        userService.saveOrUpdate(user);
+        Users result = userService.saveOrUpdate(user);
+        Carts carts= new Carts();
+        carts.setUsers(result);
+        carts.setCartStatus(0);
+        cartService.saveOrUpdate(carts);
         return ResponseEntity.ok(new MessageResponse("User registered successful"));
     }
 
@@ -314,10 +323,10 @@ public class UserController {
         List<Users> usersForModerator = new ArrayList<>();
         List<Users> listUser = userService.findAll();
         Set<Roles> roleUser = new HashSet<>();
-        Roles userRole = new Roles(3,ERole.ROLE_USER);
+        Roles userRole = new Roles(3, ERole.ROLE_USER);
         roleUser.add(userRole);
         for (Users user : listUser) {
-            if (user.getListRoles().containsAll(roleUser)&&user.getListRoles().size()==1){
+            if (user.getListRoles().containsAll(roleUser) && user.getListRoles().size() == 1) {
                 usersForModerator.add(user);
             }
 
@@ -327,7 +336,7 @@ public class UserController {
 
     @PostMapping("createNewUser")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
-    public ResponseEntity<?> createUserforModerator(@RequestBody RegisterRequest signupRequest){
+    public ResponseEntity<?> createUserforModerator(@RequestBody RegisterRequest signupRequest) {
         if (userService.existsByUserName(signupRequest.getUserName())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Usermame is already"));
         }
@@ -350,7 +359,7 @@ public class UserController {
         user.setRanks(0);
         user.setStatusUser(true);
         Set<Roles> roleUser = new HashSet<>();
-        Roles userRole = new Roles(3,ERole.ROLE_USER);
+        Roles userRole = new Roles(3, ERole.ROLE_USER);
         roleUser.add(userRole);
         user.setListRoles(roleUser);
         userService.saveOrUpdate(user);
@@ -359,7 +368,7 @@ public class UserController {
 
     @PutMapping("updateUserForModerator/{userId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
-    public ResponseEntity<?> updateUserForModerator(@PathVariable("userId") int userId, @RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<?> updateUserForModerator(@PathVariable("userId") int userId, @RequestBody RegisterRequest registerRequest) {
         Users userUpdateModerator = (Users) userService.findById(userId);
         userUpdateModerator.setStatusUser(registerRequest.isStatusUser());
         userUpdateModerator.setRanks(registerRequest.getRanks());
@@ -370,7 +379,7 @@ public class UserController {
     //    ----------------------- ROLE : USER ------------------------
     @PutMapping("updateUserForUser/{userId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> updateUserForUser(@PathVariable("userId") int userId, @RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<?> updateUserForUser(@PathVariable("userId") int userId, @RequestBody RegisterRequest registerRequest) {
         if (userService.existsByEmail(registerRequest.getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already"));
         }
@@ -389,6 +398,23 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("Update successfully!"));
     }
 
+    @PostMapping("changePassword")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePassword changePassword) {
+//        USER dang dang nhap
+        CustomUserDetails usersChangePass = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users users = userService.findUsersByUserName(usersChangePass.getUsername());
+//        thong tin request
+        String userName = changePassword.getUserName();
+        String oldPass = changePassword.getOldPass();
+        String newPass = changePassword.getNewPass();
+
+        if (usersChangePass.getUsername().equals(userName) && BCrypt.checkpw(oldPass, usersChangePass.getPassword())) {
+            users.setPasswords(encoder.encode(newPass));
+            userService.saveOrUpdate(users);
+        }
+        return ResponseEntity.ok(new MessageResponse("Change password successfully!"));
+    }
     @PutMapping("addWishList/{bookId}")
     public ResponseEntity<?> addToWishList(@PathVariable("bookId")int bookId){
         Book book = bookService.getById(bookId);

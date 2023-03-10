@@ -1,6 +1,8 @@
 package ra.dto.response;
 
 
+import ra.model.entity.Carts;
+
 import java.time.LocalDate;
 import java.util.List;
 public class JwtResponse {
@@ -20,10 +22,11 @@ public class JwtResponse {
     private int ranks;
     private List<String> listRoles;
     private String token;
+    private Carts carts;
     private String type = "Bearer";
 
     public JwtResponse(int userId,String firstName, String lastName, String token, String userName, String email, String address, String state, String city,
-                       String post, String phone, String avatar, int ranks, List<String> listRoles) {
+                       String post, String phone, String avatar, int ranks, List<String> listRoles,Carts carts) {
         this.userId=userId;
         this.firstName=firstName;
         this.lastName=lastName;
@@ -38,6 +41,7 @@ public class JwtResponse {
         this.avatar=avatar;
         this.ranks=ranks;
        this.listRoles=listRoles;
+       this.carts=carts;
     }
 
     public int getUserId() {
@@ -168,12 +172,12 @@ public class JwtResponse {
         this.token = token;
     }
 
-    public String getType() {
-        return type;
+    public Carts getCarts() {
+        return carts;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCarts(Carts carts) {
+        this.carts = carts;
     }
 }
 

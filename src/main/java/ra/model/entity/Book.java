@@ -1,14 +1,15 @@
 package ra.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
-@Table(name = "Book")
+@Table(name = "book")
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +42,22 @@ public class Book {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CatalogId")
     private Category catalog;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "authorId", referencedColumnName = "authorId")
+    private Author author;
+    @OneToMany(mappedBy = "book")
+    @JsonIgnore
+    private List<LikeBook> listLikeBook = new ArrayList<>();
+    @OneToMany (mappedBy = "book")
+    @JsonIgnore
+    private List<CartDetail> cartDetails= new ArrayList<>();
+    @OneToMany(mappedBy = "book")
+    @JsonIgnore
+    private List<Comment> listComment = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable( name = "Tag_Book", joinColumns = @JoinColumn(name = "bookId"), inverseJoinColumns = @JoinColumn(name = "tagId"))
+    private List<Tag> tagList= new ArrayList<>();
+}
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserId")

@@ -16,7 +16,6 @@ import ra.model.entity.Users;
 import ra.model.repository.BookRepository;
 import ra.model.repository.UserRepository;
 import ra.model.service.UserService;
-import ra.security.CustomUserDetails;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -82,7 +81,7 @@ public class UserServiceImple implements UserService {
     }
 
     @Override
-    public Page<Users> listUser(Pageable pageable) {
+    public Page<Users> getAllList(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
