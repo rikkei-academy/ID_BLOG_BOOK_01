@@ -52,14 +52,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors() // Ngăn chặn request từ một domain khác
                 .and().csrf().disable()
                 .authorizeRequests()
+
+                .antMatchers("/api/v1/users/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
+                .antMatchers("/api/v1/category/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
+                .antMatchers("/api/v1/passReset/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
+                .antMatchers("/api/v1/book/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
+                .antMatchers("/api/v1/author/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
+                .antMatchers("/api/v1/likeBook/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
+
                 .antMatchers("/api/v1/contact/**").permitAll()
-                .antMatchers("/api/v1/users/**").permitAll()
-                .antMatchers("/api/v1/category/**").permitAll()
-                .antMatchers("/api/v1/passReset/**").permitAll()
-                .antMatchers("/api/v1/book/**").permitAll()
-                .antMatchers("/api/v1/author/**").permitAll()
+
                 .antMatchers("/api/v1/cart/**").permitAll()// Cho phép tất cả mọi người truy cập vào địa chỉ này
                 .anyRequest().authenticated(); // Tất cả các request khác đều cần phải xác thực mới được truy cập
+
         // Thêm một lớp Filter kiểm tra jwt
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
