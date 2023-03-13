@@ -1,7 +1,6 @@
 package ra.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,10 +11,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 import ra.dto.request.ChangePassword;
 import ra.dto.request.RegisterRequest;
 import ra.dto.request.UserLogin;
@@ -26,30 +29,29 @@ import ra.dto.response.UserDto;
 import ra.jwt.JwtTokenProvider;
 import ra.model.entity.*;
 import ra.model.service.CartService;
-import ra.model.entity.*;
 import ra.model.service.BookService;
 import ra.model.service.RoleService;
 import ra.model.service.UserService;
 import ra.security.CustomUserDetails;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin("http://localhost:8080")
+    @CrossOrigin("http://localhost:8080")
 @RequestMapping("/api/v1/users")
 @AllArgsConstructor
 public class UserController {
+
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider tokenProvider;
     private UserService userService;
-
     private PasswordEncoder encoder;
-
     private RoleService roleService;
-    @Autowired
     private BookService bookService;
     private CartService cartService;
+    private OAuth2UserService oAuth2UserService;
 
     @GetMapping("/getAllByFilter")
     public ResponseEntity<?> getAllByFilter(@RequestBody List<Filter> list) {
@@ -106,7 +108,7 @@ public class UserController {
         List<String> listRoles = customUserDetail.getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
         JwtResponse response = new JwtResponse(customUserDetail.getUserId(), customUserDetail.getFirstName(), customUserDetail.getLastName(), jwt, customUserDetail.getUsername(), customUserDetail.getEmail(),
-                customUserDetail.getAddress(), customUserDetail.getState(), customUserDetail.getCity(), customUserDetail.getPost(), customUserDetail.getPhone(), customUserDetail.getAvatar(), customUserDetail.getRanks(), listRoles,customUserDetail.getCarts().get(customUserDetail.getCarts().size()-1));
+                customUserDetail.getAddress(), customUserDetail.getState(), customUserDetail.getCity(), customUserDetail.getPost(), customUserDetail.getPhone(), customUserDetail.getAvatar(), customUserDetail.getRanks(), listRoles, customUserDetail.getCarts().get(customUserDetail.getCarts().size() - 1));
         return ResponseEntity.ok(response);
     }
 
@@ -132,7 +134,6 @@ public class UserController {
             return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
         }
     }
-
     @DeleteMapping("/block_user/{userId}")
     public ResponseEntity<?> blockUser(@PathVariable int userId) {
         try {
@@ -146,6 +147,22 @@ public class UserController {
         } catch (Exception e) {
             return new ResponseEntity<>("BlockUser Error", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    // dang nhap voi gg
+
+    @GetMapping("/login_with_google")
+    public RedirectView loginWithGoogle(){
+        return new RedirectView("/login/oauth2/code/google");
+    }
+    @GetMapping("/success/profile")
+    public ResponseEntity<Map<String, Object>> getUserInfo(@AuthenticationPrincipal OAuth2User principal) {
+        Map<String, Object> userAttributes = principal.getAttributes();
+        String name = (String) userAttributes.get("name");
+        String email = (String) userAttributes.get("email");
+        userAttributes.put("name",name);
+        userAttributes.put("email",email);
+        return new ResponseEntity<>(userAttributes,HttpStatus.OK);
     }
 
     //    ------------------    ĐĂNG KÝ   ----------------------
@@ -213,7 +230,7 @@ public class UserController {
         }
         user.setListRoles(listRoles);
         Users result = userService.saveOrUpdate(user);
-        Carts carts= new Carts();
+        Carts carts = new Carts();
         carts.setUsers(result);
         carts.setCartStatus(0);
         cartService.saveOrUpdate(carts);
@@ -414,8 +431,9 @@ public class UserController {
         }
         return ResponseEntity.ok(new MessageResponse("Change password successfully!"));
     }
+
     @PutMapping("addWishList/{bookId}")
-    public ResponseEntity<?> addToWishList(@PathVariable("bookId")int bookId){
+    public ResponseEntity<?> addToWishList(@PathVariable("bookId") int bookId) {
         Book book = bookService.getById(bookId);
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Users user = userService.findById(customUserDetails.getUserId());
@@ -424,18 +442,18 @@ public class UserController {
 
             userService.saveOrUpdate(user);
             return ResponseEntity.ok("Đã thêm sản phẩm vào danh mục ưa thích");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.ok("Có lỗi trong quá trình xử lý vui lòng thử lại!");
         }
     }
 
     @PutMapping("removeWishList/{bookId}")
-    public ResponseEntity<?> removeWishList(@PathVariable("bookId")int bookId){
+    public ResponseEntity<?> removeWishList(@PathVariable("bookId") int bookId) {
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Users user = userService.findById(customUserDetails.getUserId());
-        for (Book book :user.getWishList()) {
-            if (book.getBookId()==bookId){
+        for (Book book : user.getWishList()) {
+            if (book.getBookId() == bookId) {
                 user.getWishList().remove(bookService.getById(bookId));
                 break;
             }
@@ -443,21 +461,23 @@ public class UserController {
         try {
             userService.saveOrUpdate(user);
             return ResponseEntity.ok("Đã bỏ yêu thích sản phẩm này!");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.ok("Có lỗi trong quá trình xử lý vui lòng thử lại!");
         }
     }
+
     @GetMapping("/new")
-    List<Users> getAll(){
+    List<Users> getAll() {
         return userService.getAll();
     }
+
     @GetMapping("getAllWishList")
-    public ResponseEntity<?> getAllWishList(){
+    public ResponseEntity<?> getAllWishList() {
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Book> listBook = bookService.getAllWishList(customUserDetails.getUserId());
         List<DisplayBook> list = new ArrayList<>();
-        for (Book pro :listBook) {
+        for (Book pro : listBook) {
             DisplayBook displayBook = new DisplayBook();
             displayBook.setBookId(pro.getBookId());
             displayBook.setBookName(pro.getBookName());
