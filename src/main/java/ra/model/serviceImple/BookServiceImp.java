@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ra.model.entity.Book;
+import ra.model.entity.CartDetail;
 import ra.model.repository.BookRepository;
 import ra.model.service.BookService;
 
@@ -58,6 +59,11 @@ public class BookServiceImp implements BookService {
     @Override
     public List<Book> getAllWishList(int userId) {
         return bookRepository.getAllWishList(userId);
+    }
+
+    @Override
+    public List<Book> findByCartDetailsIn(List<CartDetail> listCartDetail) {
+        return bookRepository.findByCartDetailsIn(listCartDetail);
     }
 
 }

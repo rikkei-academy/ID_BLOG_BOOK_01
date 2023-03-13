@@ -64,4 +64,9 @@ public class CartServiceImple implements CartService {
         cart.setState(confirm.getState());
         return cart;
     }
+
+    @Override
+    public List<Carts> findByCreatDateBetween(LocalDate startDate, LocalDate endDate) {
+        return cartRepository.findByCreatDateBetween(startDate, endDate);
+    }
 }
