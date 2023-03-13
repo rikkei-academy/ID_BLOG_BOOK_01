@@ -39,7 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-    @CrossOrigin("http://localhost:8080")
+@CrossOrigin("http://localhost:8080")
 @RequestMapping("/api/v1/users")
 @AllArgsConstructor
 public class UserController {
@@ -71,6 +71,7 @@ public class UserController {
             @RequestParam String direction,
             @RequestParam String sortBy) {
         Map<String, Object> data = new HashMap<>();
+
         try {
             Sort.Order order;
             if (direction.equals("asc")) {

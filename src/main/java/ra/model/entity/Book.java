@@ -61,4 +61,8 @@ public class Book {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserId")
     private Users users;
+    @OneToMany(mappedBy = "book")
+    @JsonIgnore
+    private List<Star> starList=new ArrayList<>();
+
 }
