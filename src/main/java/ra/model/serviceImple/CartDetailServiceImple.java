@@ -50,4 +50,9 @@ public class CartDetailServiceImple implements CartDetailService {
             return false;
         }
     }
+
+    @Override
+    public List<CartDetail> findByBook_BookId(int bookId) {
+        return cartDetailRepository.findByBook_BookId(bookId);
+    }
 }
