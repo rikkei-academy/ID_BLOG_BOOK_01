@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ra.model.entity.CartDetail;
+import ra.model.entity.Carts;
 import ra.model.repository.CartDetailRepository;
 import ra.model.service.CartDetailService;
 import java.util.List;
@@ -55,4 +56,11 @@ public class CartDetailServiceImple implements CartDetailService {
     public List<CartDetail> findByBook_BookId(int bookId) {
         return cartDetailRepository.findByBook_BookId(bookId);
     }
+
+    @Override
+    public List<CartDetail> findByCartsIn(List<Carts> listCart) {
+        return cartDetailRepository.findByCartsIn(listCart);
+    }
+
+
 }
