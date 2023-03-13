@@ -56,9 +56,6 @@ public class Users {
     @JoinTable(name = "wishlist",joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "bookId"))
     private Set<Book> wishList = new HashSet<>();
     //tạo bảng Star
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "star",joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "bookId"))
-    private Set<Book> star = new HashSet<>();
     @OneToMany(mappedBy = "users")
     @JsonIgnore
     private List<LikeBook> listLikeBook = new ArrayList<>();
