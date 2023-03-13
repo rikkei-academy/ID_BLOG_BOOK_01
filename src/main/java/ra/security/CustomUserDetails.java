@@ -78,7 +78,7 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public boolean isEnabled() {
+    public boolean isEnabled(){
         return true;
     }
 }
