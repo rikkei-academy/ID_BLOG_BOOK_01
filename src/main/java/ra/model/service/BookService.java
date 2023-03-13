@@ -3,6 +3,7 @@ package ra.model.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ra.model.entity.Book;
+import ra.model.entity.CartDetail;
 import ra.model.entity.Category;
 
 import java.util.List;
@@ -17,4 +18,5 @@ public interface BookService {
     Page<Book> getPagging(Pageable pageable);
     List<Book> getAllWishList(int userId);
 
+    List<Book> findByCartDetailsIn(List<CartDetail> listCartDetail);
 }
