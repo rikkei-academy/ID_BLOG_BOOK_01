@@ -11,15 +11,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ra.dto.request.CommentRequest;
-import ra.model.entity.Author;
-import ra.model.entity.Book;
-import ra.model.entity.Comment;
-import ra.model.entity.Users;
+import ra.model.entity.*;
 import ra.model.service.BookService;
+import ra.model.service.CartDetailService;
 import ra.model.service.CommentService;
 import ra.model.service.UserService;
 import ra.security.CustomUserDetails;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,8 @@ public class CommentController {
     private UserService userService;
     @Autowired
     private BookService bookService;
+    @Autowired
+    private CartDetailService cartDetailService;
 
     //    -------------------   ROLE: ADMIN & MODERATOR  -------------------------
     @GetMapping("/{commentId}")
@@ -110,7 +111,7 @@ public class CommentController {
         Comment commentDelete = commentService.findById(commentId);
         List<Comment> listChild = commentService.findChildById(commentId);
         commentDelete.setCommentStatus(false);
-        if (listChild!=null) {
+        if (listChild != null) {
             for (Comment cm : listChild) {
                 cm.setCommentStatus(false);
                 commentService.saveOrUpdate(cm);
@@ -126,16 +127,16 @@ public class CommentController {
             @RequestParam(defaultValue = "3") int size,
             @RequestParam("direction") String direction) {
         Sort.Order order = null;
-        if (direction.equals("asc")){
-            order = new Sort.Order(Sort.Direction.ASC,"commentId");
-        } else if (direction.equals("des")){
-            order = new Sort.Order(Sort.Direction.DESC,"commentId");
+        if (direction.equals("asc")) {
+            order = new Sort.Order(Sort.Direction.ASC, "commentId");
+        } else if (direction.equals("des")) {
+            order = new Sort.Order(Sort.Direction.DESC, "commentId");
         }
-        Pageable pageable = PageRequest.of(page, size,Sort.by(order));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(order));
         Page<Comment> pageComment = commentService.getAllList(pageable);
         Map<String, Object> data = new HashMap<>();
 //        Dữ liệu trả về trên 1 trang
-        data.put("comments",pageComment.getContent());
+        data.put("comments", pageComment.getContent());
 //        Tổng bản ghi trên 1 trang
         data.put("total", pageComment.getSize());
 //        Tổng dữ liệu
@@ -154,9 +155,9 @@ public class CommentController {
         Map<String, Object> data = new HashMap<>();
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Comment> pageListComment = commentService.findByBook_BookName(searchName,pageable);
+            Page<Comment> pageListComment = commentService.findByBook_BookName(searchName, pageable);
 //        Dữ liệu trả về trên 1 trang
-            data.put("comment",pageListComment.getContent());
+            data.put("comment", pageListComment.getContent());
 //        Tổng bản ghi trên 1 trang
             data.put("total", pageListComment.getSize());
 //        Tổng dữ liệu
@@ -165,7 +166,7 @@ public class CommentController {
             data.put("totalPage", pageListComment.getTotalPages());
             return new ResponseEntity<>(data, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(data,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -178,9 +179,9 @@ public class CommentController {
         Map<String, Object> data = new HashMap<>();
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Comment> pageListComment = commentService.findByUsers_UserName(searchName,pageable);
+            Page<Comment> pageListComment = commentService.findByUsers_UserName(searchName, pageable);
 //        Dữ liệu trả về trên 1 trang
-            data.put("comment",pageListComment.getContent());
+            data.put("comment", pageListComment.getContent());
 //        Tổng bản ghi trên 1 trang
             data.put("total", pageListComment.getSize());
 //        Tổng dữ liệu
@@ -189,7 +190,7 @@ public class CommentController {
             data.put("totalPage", pageListComment.getTotalPages());
             return new ResponseEntity<>(data, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(data,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -201,15 +202,28 @@ public class CommentController {
         Users users = userService.findUsersByUserName(usersChangePass.getUsername());
         Book book = bookService.getById(comment.getBookId());
 
-        Comment commentNew = new Comment();
-        commentNew.setContent(comment.getContent());
-        commentNew.setUsers(users);
-        commentNew.setBook(book);
-        commentNew.setCommentParentId(comment.getCommentParentId());
-        commentNew.setCommentStatus(false);
-        commentService.saveOrUpdate(commentNew);
+        List<Users> usersList = new ArrayList<>();
+        List<CartDetail> listCartDetail = cartDetailService.findByBook_BookId(book.getBookId());
+        for (CartDetail cd : listCartDetail) {
+            usersList.add(cd.getCarts().getUsers());
+        }
 
-        return ResponseEntity.ok().body("Comment success");
+        for (Users user : usersList) {
+            if (user.getUserId()==users.getUserId()){
+                Comment commentNew = new Comment();
+                commentNew.setContent(comment.getContent());
+                commentNew.setUsers(users);
+                commentNew.setBook(book);
+                commentNew.setCommentParentId(comment.getCommentParentId());
+                commentNew.setCommentStatus(false);
+                commentService.saveOrUpdate(commentNew);
+
+                return ResponseEntity.ok().body("Comment success");
+            }
+        }
+
+        return ResponseEntity.badRequest().body("Comment failed");
+
     }
 
     @PutMapping("/{commentId}")
